@@ -1,0 +1,241 @@
+/* Import Font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+/* Reset dan Pengaturan Dasar */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    background-color: #333; /* Warna cadangan jika gambar gagal dimuat */
+    /* PERBAIKAN: Menggunakan gambar lokal untuk stabilitas */
+    background-image: url('../img/background3.png');
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+}
+
+.login-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100%;
+    width: 100%;
+}
+
+/* Panel Kiri untuk Branding */
+.branding-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.branding-panel .content {
+    text-align: center;
+    max-width: 400px;
+}
+
+.branding-panel h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.branding-panel p {
+    font-size: 1.1rem;
+    font-weight: 300;
+    line-height: 1.6;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+
+/* Panel Kanan untuk Form */
+.form-panel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.form-box {
+    width: 100%;
+    max-width: 400px;
+    padding: 40px;
+    position: relative;
+}
+
+.back-to-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: #fff;
+    font-size: 1.5rem;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: all 0.3s ease;
+}
+.back-to-home:hover {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.login-logo {
+    display: block;
+    height: 50px;
+    width: auto;
+    margin: 0 auto 20px;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6));
+}
+
+.form-box h2 {
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.form-box .subtitle {
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Input Fields */
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group .icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.input-group input {
+    width: 100%;
+    padding: 15px 15px 15px 50px; /* Padding untuk ikon */
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.input-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.input-group input:focus {
+    outline: none;
+    background: rgba(0, 0, 0, 0.3);
+    border-color: #ea580c; /* Warna oranye khas Azrina */
+    box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.3);
+}
+
+/* Tombol Login */
+button[type="submit"] {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ea580c; /* Warna oranye khas Azrina */
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #c2410c; /* Oranye lebih gelap */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* Link Daftar/Lupa Password */
+.register-link {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.register-link a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* Pesan Error/Sukses */
+.error-message, .success-message {
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 0.9rem;
+    width: 100%;
+}
+
+.error-message {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #f8fafc;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.success-message {
+    background-color: rgba(34, 197, 94, 0.2);
+    color: #f8fafc;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+}
+
+/* ========================================= */
+/* PERBAIKAN RESPONSIVE (MEDIA QUERY)        */
+/* ========================================= */
+/* Untuk layar tablet dan di bawahnya */
+@media (max-width: 992px) {
+    .login-container {
+        /* Layout diubah jadi 1 kolom saja */
+        grid-template-columns: 1fr;
+    }
+
+    .branding-panel {
+        /* Panel gambar disembunyikan untuk hemat tempat */
+        display: none;
+    }
+
+    .form-panel {
+        /* PERUBAHAN: Efek kaca dipertahankan di mobile */
+        /* background-color diatur di atas dan tetap berlaku */
+        /* backdrop-filter juga tetap berlaku */
+        border-left: none; /* Hapus border karena tidak ada panel kiri */
+    }
+}
+
+/* Untuk layar HP */
+@media (max-width: 576px) {
+    .form-box {
+        padding: 25px; /* Kurangi padding di layar sangat kecil */
+    }
+
+    .branding-panel h1 {
+        font-size: 2.5rem; /* Kecilkan judul */
+    }
+}

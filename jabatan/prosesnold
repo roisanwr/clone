@@ -1,0 +1,281 @@
+<?php
+// File: proyek_jaya/jabatan/proses.php
+
+// 1. Panggil Konfigurasi dan mulai session
+require_once '../config.php';
+
+// 2. Autentikasi: Pastikan pengguna sudah login
+if (!isset($_SESSION['user_id'])) {
+    // Jika belum login, redirect ke halaman login
+    // Meskipun form tambah.php sudah ada auth check, proses.php juga WAJIB punya.
+    header('Location: ' . BASE_URL . 'auth/login.php?error=2');
+    exit;
+}
+
+// 3. Autorisasi: Hanya Super Admin dan Admin yang boleh melakukan aksi CRUD jabatan
+$allowed_roles = ['super_admin', 'admin'];
+if (!in_array($_SESSION['role'], $allowed_roles)) {
+    // Jika peran tidak diizinkan, simpan pesan error di session dan redirect
+    $_SESSION['pesan_error_crud'] = "MAAF, ANDA TIDAK MEMILIKI HAK AKSES UNTUK MELAKUKAN TINDAKAN INI.";
+    header('Location: ' . BASE_URL . 'jabatan/'); // Redirect kembali ke daftar jabatan
+    exit;
+}
+
+// 4. Logika untuk AKSI TAMBAH JABATAN
+// Kita cek apakah ada parameter 'aksi' di URL dan nilainya adalah 'tambah'
+if (isset($_GET['aksi']) && $_GET['aksi'] == 'tambah') {
+
+    // Pastikan request yang datang adalah metode POST (dari form tambah.php)
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+        // Ambil dan sanitasi data dari form
+        // trim() untuk menghapus spasi di awal/akhir string
+        // mysqli_real_escape_string untuk mencegah SQL injection dasar pada string
+        // floatval untuk memastikan nilai adalah angka desimal
+        $namajabatan = isset($_POST['namajabatan']) ? mysqli_real_escape_string($koneksi, trim($_POST['namajabatan'])) : '';
+        $gajipokok = isset($_POST['gajipokok']) ? floatval($_POST['gajipokok']) : 0;
+        $tunjangan_lembur = isset($_POST['tunjangan_lembur']) ? floatval($_POST['tunjangan_lembur']) : 0;
+
+        // Validasi dasar: pastikan input tidak kosong dan angka valid
+        if (empty($namajabatan) || $gajipokok <= 0 || $tunjangan_lembur < 0) {
+            // Gaji pokok harus lebih besar dari 0, tunjangan lembur bisa 0 atau lebih.
+            $_SESSION['pesan_error_crud'] = "Nama jabatan wajib diisi. Gaji pokok harus lebih besar dari 0, dan tunjangan lembur tidak boleh negatif.";
+            header('Location: ' . BASE_URL . 'jabatan/tambah.php'); // Kembalikan ke form tambah
+            exit;
+        }
+
+        // (Opsional tapi sangat direkomendasikan) Cek apakah nama jabatan sudah ada untuk menghindari duplikasi
+        $sql_cek_duplikat = "SELECT id_jabatan FROM jabatan WHERE namajabatan = ?";
+        $stmt_cek = mysqli_prepare($koneksi, $sql_cek_duplikat);
+        mysqli_stmt_bind_param($stmt_cek, "s", $namajabatan);
+        mysqli_stmt_execute($stmt_cek);
+        $result_cek = mysqli_stmt_get_result($stmt_cek);
+
+        if (mysqli_num_rows($result_cek) > 0) {
+            mysqli_stmt_close($stmt_cek);
+            $_SESSION['pesan_error_crud'] = "Nama jabatan '" . htmlspecialchars($namajabatan) . "' sudah terdaftar. Silakan gunakan nama lain.";
+            header('Location: ' . BASE_URL . 'jabatan/tambah.php'); // Kembalikan ke form tambah
+            exit;
+        }
+        mysqli_stmt_close($stmt_cek); // Tutup statement pengecekan duplikat
+
+        // Siapkan query INSERT menggunakan prepared statement untuk keamanan
+        $sql_insert = "INSERT INTO jabatan (namajabatan, gajipokok, tunjangan_lembur) VALUES (?, ?, ?)";
+        $stmt_insert = mysqli_prepare($koneksi, $sql_insert);
+
+        if ($stmt_insert) {
+            // Bind parameter ke statement: "sdd" artinya String, Double, Double
+            mysqli_stmt_bind_param($stmt_insert, "sdd", $namajabatan, $gajipokok, $tunjangan_lembur);
+
+            // Eksekusi statement
+            if (mysqli_stmt_execute($stmt_insert)) {
+                // Jika berhasil, set pesan sukses di session
+                $_SESSION['pesan_sukses'] = "Jabatan '" . htmlspecialchars($namajabatan) . "' berhasil ditambahkan!";
+            } else {
+                // Jika gagal eksekusi, set pesan error di session
+                // Untuk development, bisa tampilkan error SQL: mysqli_stmt_error($stmt_insert)
+                $_SESSION['pesan_error_crud'] = "GAGAL menambahkan jabatan. Terjadi kesalahan saat menyimpan ke database.";
+                // error_log("Error INSERT Jabatan: " . mysqli_stmt_error($stmt_insert)); // Catat error ke log server
+            }
+            mysqli_stmt_close($stmt_insert); // Tutup statement insert
+        } else {
+            // Jika gagal mempersiapkan statement (error di SQL atau koneksi)
+            $_SESSION['pesan_error_crud'] = "Terjadi kesalahan pada sistem (gagal mempersiapkan statement SQL).";
+            // error_log("Error PREPARE INSERT Jabatan: " . mysqli_error($koneksi)); // Catat error ke log server
+        }
+
+        // Apapun hasilnya (sukses atau gagal), redirect kembali ke halaman daftar jabatan
+        header('Location: ' . BASE_URL . 'jabatan/');
+        exit;
+
+    } else {
+        // Jika metode request bukan POST, tapi aksinya 'tambah', mungkin ada yang salah.
+        // Redirect ke form tambah untuk menghindari akses langsung ke skrip proses.
+        $_SESSION['pesan_error_crud'] = "Metode request tidak valid untuk menambah jabatan.";
+        header('Location: ' . BASE_URL . 'jabatan/tambah.php');
+        exit;
+    }
+} 
+// --- NANTI KITA TAMBAHKAN BLOK 'ELSE IF' UNTUK AKSI EDIT DAN HAPUS DI SINI ---
+// elseif (isset($_GET['aksi']) && $_GET['aksi'] == 'edit') { ... }
+elseif (isset($_GET['aksi']) && $_GET['aksi'] == 'edit' && isset($_GET['id'])) {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $id_jabatan_edit = intval($_GET['id']);
+        $namajabatan_baru = isset($_POST['namajabatan']) ? mysqli_real_escape_string($koneksi, trim($_POST['namajabatan'])) : '';
+
+        // Ambil gaji dan tunjangan dari POST HANYA jika bukan admin,
+        // atau ambil dari database jika admin (untuk memastikan nilai lama tidak tertimpa jika admin mencoba 'nakal')
+        if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+            // Admin hanya bisa update nama jabatan
+            $sql_update = "UPDATE jabatan SET namajabatan = ? WHERE id_jabatan = ?";
+            $stmt_update = mysqli_prepare($koneksi, $sql_update);
+            if ($stmt_update) {
+                mysqli_stmt_bind_param($stmt_update, "si", $namajabatan_baru, $id_jabatan_edit);
+            }
+        } elseif (isset($_SESSION['role']) && $_SESSION['role'] === 'super_admin') {
+            // Super Admin bisa update semua field
+            $sql_update = "UPDATE jabatan SET namajabatan = ?, gajipokok = ?, tunjangan_lembur = ? WHERE id_jabatan = ?";
+            $stmt_update = mysqli_prepare($koneksi, $sql_update);
+            if ($stmt_update) {
+                mysqli_stmt_bind_param($stmt_update, "sddi", $namajabatan_baru, $gajipokok_baru, $tunjangan_lembur_baru, $id_jabatan_edit);
+            }
+        } else {
+            // Jika peran tidak sesuai (seharusnya tidak terjadi karena sudah ada filter di awal)
+            $_SESSION['pesan_error_crud'] = "Peran tidak valid untuk operasi ini.";
+            header('Location: ' . BASE_URL . 'jabatan/');
+            exit;
+        }
+
+        if (isset($stmt_update) && $stmt_update) { // Pastikan $stmt_update terdefinisi
+            if (mysqli_stmt_execute($stmt_update)) {
+                $_SESSION['pesan_sukses'] = "Data jabatan '" . htmlspecialchars($namajabatan_baru) . "' berhasil diperbarui!";
+            } else {
+                $_SESSION['pesan_error_crud'] = "GAGAL memperbarui jabatan.";
+            }
+            mysqli_stmt_close($stmt_update);
+        } else {
+            $_SESSION['pesan_error_crud'] = "Terjadi kesalahan pada sistem (gagal mempersiapkan statement SQL untuk update).";
+        }
+
+        header('Location: ' . BASE_URL . 'jabatan/');
+        exit;
+    }
+        
+        else {
+            // Jika Super Admin, ambil dari POST
+            $gajipokok_baru = isset($_POST['gajipokok']) ? floatval($_POST['gajipokok']) : 0;
+            $tunjangan_lembur_baru = isset($_POST['tunjangan_lembur']) ? floatval($_POST['tunjangan_lembur']) : 0;
+        }
+
+        // Validasi dasar
+        if (empty($namajabatan_baru) || $gajipokok_baru <= 0 || $tunjangan_lembur_baru < 0) {
+            $_SESSION['pesan_error_crud'] = "Semua field wajib diisi dengan benar.";
+            header('Location: ' . BASE_URL . 'jabatan/edit.php?id=' . $id_jabatan_edit);
+            exit;
+        }
+
+        // (Opsional) Cek duplikasi nama jabatan, tapi KECUALIKAN jabatan yang sedang diedit
+        $sql_cek_duplikat_edit = "SELECT id_jabatan FROM jabatan WHERE namajabatan = ? AND id_jabatan != ?";
+        $stmt_cek_edit = mysqli_prepare($koneksi, $sql_cek_duplikat_edit);
+        mysqli_stmt_bind_param($stmt_cek_edit, "si", $namajabatan_baru, $id_jabatan_edit);
+        mysqli_stmt_execute($stmt_cek_edit);
+        $result_cek_edit = mysqli_stmt_get_result($stmt_cek_edit);
+
+        if (mysqli_num_rows($result_cek_edit) > 0) {
+            mysqli_stmt_close($stmt_cek_edit);
+            $_SESSION['pesan_error_crud'] = "Nama jabatan '" . htmlspecialchars($namajabatan_baru) . "' sudah digunakan oleh jabatan lain. Silakan gunakan nama lain.";
+            header('Location: ' . BASE_URL . 'jabatan/edit.php?id=' . $id_jabatan_edit);
+            exit;
+        }
+        mysqli_stmt_close($stmt_cek_edit);
+
+        // Siapkan query UPDATE menggunakan prepared statement
+        $sql_update = "UPDATE jabatan SET namajabatan = ?, gajipokok = ?, tunjangan_lembur = ? WHERE id_jabatan = ?";
+        $stmt_update = mysqli_prepare($koneksi, $sql_update);
+
+        if ($stmt_update) {
+            // Bind parameter: string, double, double, integer
+            mysqli_stmt_bind_param($stmt_update, "sddi", $namajabatan_baru, $gajipokok_baru, $tunjangan_lembur_baru, $id_jabatan_edit);
+
+            if (mysqli_stmt_execute($stmt_update)) {
+                $_SESSION['pesan_sukses'] = "Data jabatan '" . htmlspecialchars($namajabatan_baru) . "' berhasil diperbarui!";
+            } else {
+                $_SESSION['pesan_error_crud'] = "GAGAL memperbarui jabatan. Terjadi kesalahan saat menyimpan ke database.";
+                // error_log("Error UPDATE Jabatan: " . mysqli_stmt_error($stmt_update));
+            }
+            mysqli_stmt_close($stmt_update);
+        } else {
+            $_SESSION['pesan_error_crud'] = "Terjadi kesalahan pada sistem (gagal mempersiapkan statement SQL untuk update).";
+            // error_log("Error PREPARE UPDATE Jabatan: " . mysqli_error($koneksi));
+        }
+        
+        // Redirect kembali ke halaman daftar jabatan setelah mencoba update
+        header('Location: ' . BASE_URL . 'jabatan/');
+        exit;
+
+    } else {
+        // Jika metode request bukan POST untuk aksi edit, redirect ke daftar jabatan
+        $_SESSION['pesan_error_crud'] = "Metode request tidak valid untuk mengedit jabatan.";
+        header('Location: ' . BASE_URL . 'jabatan/');
+        exit;
+    }
+} 
+
+// elseif (isset($_GET['aksi']) && $_GET['aksi'] == 'hapus') { ... }
+
+elseif (isset($_GET['aksi']) && $_GET['aksi'] == 'hapus' && isset($_GET['id'])) {
+    
+    // PERIKSA PERAN SEBELUM LANJUT HAPUS
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'super_admin') {
+        $_SESSION['pesan_error_crud'] = "AKSES DITOLAK: Hanya Super Admin yang dapat menghapus data jabatan.";
+        header('Location: ' . BASE_URL . 'jabatan/');
+        exit;
+    }
+    // Jika lolos pengecekan peran, baru lanjutkan proses hapus
+
+    $id_jabatan_hapus = intval($_GET['id']); // Ambil ID jabatan dari URL dan pastikan integer
+
+    // Langkah 1: Cek apakah jabatan ini masih digunakan di tabel 'pekerja'
+    // Ini penting karena kita menggunakan ON DELETE RESTRICT pada foreign key
+    $sql_cek_penggunaan = "SELECT COUNT(*) as jumlah_terpakai FROM pekerja WHERE id_jabatan = ?";
+    $stmt_cek = mysqli_prepare($koneksi, $sql_cek_penggunaan);
+    
+    if ($stmt_cek) {
+        mysqli_stmt_bind_param($stmt_cek, "i", $id_jabatan_hapus);
+        mysqli_stmt_execute($stmt_cek);
+        $result_cek = mysqli_stmt_get_result($stmt_cek);
+        $data_cek = mysqli_fetch_assoc($result_cek);
+        mysqli_stmt_close($stmt_cek);
+
+        if ($data_cek['jumlah_terpakai'] > 0) {
+            // Jika jabatan masih digunakan, jangan hapus dan beri pesan error
+            $_SESSION['pesan_error_crud'] = "Jabatan tidak dapat dihapus karena masih digunakan oleh " . $data_cek['jumlah_terpakai'] . " pekerja. Harap ubah atau hapus dulu data pekerja yang terkait dengan jabatan ini.";
+        } else {
+            // Jika jabatan TIDAK digunakan, maka aman untuk dihapus
+            // Siapkan query DELETE menggunakan prepared statement
+            $sql_hapus = "DELETE FROM jabatan WHERE id_jabatan = ?";
+            $stmt_hapus = mysqli_prepare($koneksi, $sql_hapus);
+
+            if ($stmt_hapus) {
+                mysqli_stmt_bind_param($stmt_hapus, "i", $id_jabatan_hapus);
+
+                if (mysqli_stmt_execute($stmt_hapus)) {
+                    // Cek apakah ada baris yang benar-benar terhapus
+                    if (mysqli_stmt_affected_rows($stmt_hapus) > 0) {
+                        $_SESSION['pesan_sukses'] = "Data jabatan berhasil dihapus!";
+                    } else {
+                        // Ini bisa terjadi jika ID tidak ditemukan (misalnya, sudah dihapus sebelumnya)
+                        $_SESSION['pesan_error_crud'] = "Data jabatan tidak ditemukan atau mungkin sudah dihapus sebelumnya.";
+                    }
+                } else {
+                    $_SESSION['pesan_error_crud'] = "GAGAL menghapus jabatan. Terjadi kesalahan database.";
+                    // error_log("Error DELETE Jabatan: " . mysqli_stmt_error($stmt_hapus));
+                }
+                mysqli_stmt_close($stmt_hapus);
+            } else {
+                $_SESSION['pesan_error_crud'] = "Terjadi kesalahan pada sistem (gagal mempersiapkan statement SQL untuk hapus).";
+                // error_log("Error PREPARE DELETE Jabatan: " . mysqli_error($koneksi));
+            }
+        }
+    } else {
+        // Jika gagal mempersiapkan statement pengecekan penggunaan
+        $_SESSION['pesan_error_crud'] = "Terjadi kesalahan saat memeriksa penggunaan jabatan.";
+        // error_log("Error PREPARE CEK PENGGUNAAN Jabatan: " . mysqli_error($koneksi));
+    }
+    
+    // Redirect kembali ke halaman daftar jabatan setelah mencoba hapus
+    header('Location: ' . BASE_URL . 'jabatan/');
+    exit;
+}
+
+// --- BLOK ELSE UNTUK AKSI LAINNYA (JIKA ADA) ---
+else {
+    // Jika parameter 'aksi' tidak ada atau tidak dikenali
+    $_SESSION['pesan_error_crud'] = "Aksi tidak valid atau tidak dikenali.";
+    header('Location: ' . BASE_URL . 'jabatan/'); // Redirect ke daftar jabatan
+    exit;
+}
+
+// Tutup koneksi database jika sudah tidak digunakan (biasanya PHP otomatis menutup di akhir skrip)
+// mysqli_close($koneksi); // Opsional di sini karena skrip biasanya langsung exit setelah redirect
+?>

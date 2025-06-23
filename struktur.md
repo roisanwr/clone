@@ -1,0 +1,76 @@
+# Struktur Folder dan File pada Proyek Konstruksi
+
+- absensi/
+  - admin_edit.php
+  - catat.php
+  - edit_riwayat.php
+  - index.php
+  - proses.php
+  - proses_admin_edit.php
+  - proses_riwayat.php
+  - riwayat.php
+- assets/
+  - css/
+    - index_style.css
+    - login_style.css
+    - style.css
+  - img/
+    - azrina_logo.png
+  - js/
+    - index_script.js
+    - main.js
+- auth/
+  - login.php
+  - logout.php
+  - proses_login.php
+- gaji/
+  - cetak_slip.php
+  - detail_laporan.php
+  - generate.php
+  - index.php
+  - preview.php
+  - proses_finalisasi.php
+- includes/
+  - auth_check.php
+  - footer.php
+  - header.php
+  - sidebar_admin.php
+  - sidebar_mandor.php
+  - sidebar_super_admin.php
+- jabatan/
+  - edit.php
+  - index.php
+  - proses.php
+  - prosesnold
+  - tambah.php
+- klien/
+  - edit.php
+  - index.php
+  - proses.php
+  - tambah.php
+- pekerja/
+  - edit.php
+  - index.php
+  - proses.php
+  - tambah.php
+- penugasan/
+  - detail_tim.php
+  - edit.php
+  - index.php
+  - proses.php
+  - tambah.php
+- proyek/
+  - edit.php
+  - index.php
+  - proses.php
+  - proyek_saya.php
+  - tambah.php
+- users/
+  - edit.php
+  - index.php
+  - proses.php
+  - tambah.php
+- config.php
+- dashboard.php
+- improvement.MD
+- index.php

@@ -1,0 +1,180 @@
+/* Pengaturan dasar untuk scroll yang mulus */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Pengaturan font utama dan warna teks untuk seluruh halaman */
+body {
+    font-family: 'Poppins', sans-serif;
+    color: #333333;
+    overflow-x: hidden; /* Mencegah scroll horizontal */
+}
+
+/* PERBAIKAN HEADER */
+.header {
+    transition: all 0.4s ease-out;
+    color: #ffffff;
+    background-color: rgba(29, 35, 42, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.header .nav-link, .header #mobile-menu-button {
+    color: #ffffff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+/* BARU: Memberi efek "glow" pada logo agar lebih terbaca */
+.header .logo-img {
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.7));
+}
+
+
+/* Style header saat halaman di-scroll */
+.header.scrolled {
+    background-color: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.header.scrolled .nav-link, .header.scrolled #mobile-menu-button {
+     color: #333333;
+     text-shadow: none;
+}
+
+/* Saat di-scroll, efek "glow" pada logo dihilangkan */
+.header.scrolled .logo-img {
+    filter: none;
+}
+
+
+/* Latar belakang untuk bagian hero */
+.hero {
+    background-color: #1f2937; 
+    background-image: linear-gradient(rgba(17, 24, 39, 0.7), rgba(17, 24, 39, 0.7)), url('../img/background4.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+/* Efek hover untuk kartu layanan */
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+/* BARU: Style untuk Galeri Layanan Model Flyer/Brosur */
+.service-flyer {
+    transition: all 0.3s ease-in-out;
+}
+
+.service-flyer:hover {
+    transform: translateY(-8px) scale(1.03);
+}
+
+.service-flyer .service-img {
+    transition: box-shadow 0.3s ease;
+    cursor: zoom-in; /* Mengubah kursor jadi ikon zoom */
+}
+
+.service-flyer:hover .service-img {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* shadow-2xl */
+}
+
+
+
+
+/* Transisi untuk item portofolio */
+.portfolio-item {
+    transition: all 0.3s ease;
+}
+
+/* Style untuk filter portofolio yang aktif */
+.portfolio-filter.active {
+    background-color: #ea580c; /* Tailwind orange-600 */
+    color: white;
+}
+
+.portfolio-filter:not(.active):hover {
+    background-color: #f3f4f6; /* Tailwind gray-100 */
+}
+
+/* Animasi kursor mengetik */
+.typing-text::after {
+    content: '|';
+    animation: blink 0.7s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Animasi muncul saat di-scroll */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.6s ease-out;
+}
+
+.scroll-reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Style untuk Tombol WhatsApp Melayang (Perbaikan Final) */
+#whatsapp-float-button {
+    position: fixed !important; /* Jurus pamungkas untuk memaksa posisi */
+    bottom: 25px;
+    right: 25px;
+    background-color: #25D366; /* Warna resmi WhatsApp */
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem; /* Ukuran ikon WhatsApp */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    animation: pulse 2s infinite;
+}
+
+#whatsapp-float-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+    animation: none; /* Hentikan animasi denyut saat di-hover */
+}
+
+/* Animasi denyut untuk tombol WhatsApp */
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(37, 211, 102, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+    }
+}
+
+/* Style untuk Image Lightbox/Modal */
+#image-modal {
+    display: none; /* Awalnya disembunyikan */
+    opacity: 0;
+}
+
+#image-modal.show {
+    display: flex; /* Diubah jadi flex oleh JS untuk menampilkan */
+    opacity: 1;
+}
+
+/* Mencegah body scroll saat modal aktif */
+body.modal-open {
+    overflow: hidden;
+}
