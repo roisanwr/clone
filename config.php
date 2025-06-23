@@ -9,9 +9,9 @@ error_reporting(E_ALL);
 // --- 1. Pengaturan Database ---
 // Sesuaikan nilai-nilai ini dengan pengaturan database MySQL kamu.
 define('DB_HOST', 'localhost');         // Biasanya 'localhost' jika database di server yang sama.
-define('DB_NAME', 'u951570841_kontraktor');              // Nama database kita yang sudah kita sepakati!
-define('DB_USER', 'u951570841_ridwan');              // Ganti dengan username database MySQL kamu.
-define('DB_PASS', 'Azrinaj4y4#');                  // Ganti dengan password database MySQL kamu (kosongkan jika tidak ada).
+define('DB_NAME', 'u951570841_clone');              // Nama database kita yang sudah kita sepakati!
+define('DB_USER', 'u951570841_clone');              // Ganti dengan username database MySQL kamu.
+define('DB_PASS', 'Cl0ne4ja');                  // Ganti dengan password database MySQL kamu (kosongkan jika tidak ada).
 
 // Buat koneksi ke database menggunakan MySQLi
 $koneksi = mysqli_connect(DB_HOST, DB_USER, DB_PASS, DB_NAME);
@@ -33,7 +33,7 @@ mysqli_set_charset($koneksi, "utf8mb4");
 // Sesuaikan dengan alamat di mana kamu akan mengakses proyek ini di browser.
 // Contoh: jika diakses via http://localhost/proyek_jaya/, maka BASE_URL-nya seperti di bawah.
 // JANGAN LUPA tanda slash ('/') di akhir!
-define('BASE_URL', 'https://kontraktor.moku-meubel.com/'); // GANTI SESUAI ALAMAT PROYEKMU!
+define('BASE_URL', 'https://clone.moku-meubel.com/'); // GANTI SESUAI ALAMAT PROYEKMU!
 
 // --- 3. Session ---
 // Memulai session jika belum ada session yang aktif.
