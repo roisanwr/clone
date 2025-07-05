@@ -118,7 +118,7 @@ require_once '../includes/sidebar_super_admin.php';
 
                 <div class="mt-8 flex items-center justify-end gap-x-4 border-t border-gray-200 dark:border-gray-700 pt-6">
                     <a href="<?php echo BASE_URL; ?>users/" class="text-sm font-semibold ...">Batal</a>
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 ...">
+                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-blue-600 ...">
                         <i class="fas fa-user-check fa-fw mr-2"></i>Update Akun
                     </button>
                 </div>
